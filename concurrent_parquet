@@ -1,0 +1,20 @@
+import pandas as pd
+from concurrent.futures import ProcessPoolExecutor
+
+# Read the large CSV file
+df = pd.read_csv('large_file.csv')
+
+# Define the number of chunks to split the data into
+num_chunks = 10
+
+# Split the data into chunks
+chunks = [df.loc[df.index[i:i+num_chunks]] for i in range(0,df.shape[0],num_chunks)]
+
+# Define the directory to save the parquet files
+directory = 'parquet_files/'
+
+# Use ProcessPoolExecutor to save the chunks in parallel
+with ProcessPoolExecutor() as executor:
+    for i, chunk in enumerate(chunks):
+        executor.submit(chunk.to_parquet, f'{directory}chunk_{i}.parquet',compression='snappy')
+
